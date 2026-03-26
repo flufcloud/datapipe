@@ -1,0 +1,28 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.elixir_ls/
+
+# Node.js dependencies and build output
+**/node_modules/
+**/dist/
+npm-debug.log*
+
+# Phoenix and Elixir build artifacts
+apps/orchestrator/_build/
+apps/orchestrator/deps/
+apps/orchestrator/tmp/
+erl_crash.dump
+*.ez
+orchestrator-*.tar
+
+# Runtime data and local state
+apps/orchestrator/data/graphs/*.json
+apps/execution-engine/.local/
+
+# Environment files
+.env
+.env.*
+!.env.example
