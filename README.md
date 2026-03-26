@@ -1,150 +1,57 @@
 # DataPipe
 
-DataPipe is a visual dataflow tool for browser-based IoT and ML workflows. You build a graph of nodes on a canvas, stream live sensor data into the graph, run model inference, combine model outputs, and trigger external software from the result.
+DataPipe is a visual “sensor‑to‑action” canvas. You drag blocks onto a graph, stream live motion data in, teach small models what patterns mean (like “clockwise gesture”), combine multiple models into a higher‑level decision, and finally trigger external software (Spotify) when that decision happens.
 
-This repository contains a working prototype with:
-
-- live graph editing over Phoenix Channels
-- browser-side sensor streaming through Web Bluetooth or a built-in demo stream
-- classifier record, train, and infer workflow
-- cooperative multi-model inference through a fusion node
-- Spotify integration in mock mode and real OAuth mode
-
-## What DataPipe Can Do
-
-DataPipe currently supports these end-user workflows:
-
-- Create and connect nodes on a visual canvas.
-- Stream live `vector/3` sensor packets from a browser-connected Bluetooth device.
-- Use a demo sensor stream when no device is available.
-- Record labeled examples for a classifier node.
-- Train a classifier through the execution engine.
-- Run live inference and emit `label/string` prediction packets.
-- Combine multiple model outputs in a `Modifier.Fusion` node.
-- Trigger Spotify playback actions from classifier or fusion results.
-- Inspect packet activity, latest predictions, confidence values, connection state, and recent action history in the UI.
-
-## Monorepo Layout
-
-- `apps/orchestrator`: Elixir/Phoenix service. Owns the canonical graph, validates mutations, routes packets, persists projects, and exposes the websocket topic.
-- `apps/execution-engine`: Node.js service. Owns ML inference/training endpoints and all third-party integrations.
-- `apps/web`: React/Vite single-page app. Provides the graph canvas, inspectors, Bluetooth access, and live monitoring UI.
-- `docs`: contracts, architecture notes, implementation records, and developer documentation.
-
-## Supported Node Types
-
-- `Generator.ManualTest`: Placeholder source node for future manual packet entry workflows.
-- `Generator.Bluetooth`: Browser-side Bluetooth sensor source. Emits `vector/3`.
-- `Modifier.Classifier`: Records examples, trains a model, and emits `label/string`.
-- `Modifier.Fusion`: Combines two upstream `label/string` predictions into a higher-level `label/string`.
-- `Consumer.Log`: Reserved consumer slot for future log sinks.
-- `Consumer.Spotify`: Triggers Spotify playback actions from labels.
-
-## Current Architecture
-
-DataPipe runs as three local services:
-
-1. `apps/orchestrator` on `http://127.0.0.1:4000`
-2. `apps/execution-engine` on `http://127.0.0.1:4001`
-3. `apps/web` on the Vite dev server, usually `http://127.0.0.1:5173`
-
-Runtime responsibilities:
-
-- The web app sends graph mutations and packets over websocket.
-- The orchestrator validates the graph, persists state to JSON files, and coordinates runtime routing.
-- The execution engine handles training, inference, fusion logic, Spotify OAuth, and Spotify actions.
+Think of it as a **hands‑on lab for interactive IoT + ML pipelines**, not a production platform: it’s designed so you can see packets, models, and actions all evolving in real time on one screen.
 
 ## Prerequisites
 
-Required:
+- **OS**: Windows 10+ (scripts are PowerShell‑based; other OSes can run the underlying commands manually)
+- **Node.js**: v20 or newer
+- **Elixir**: v1.14 or newer
+- **Erlang/OTP**: compatible with your Elixir install
+- **Browser**: a recent Chromium‑family browser with Web Bluetooth support (for real devices)
 
-- Node.js 20 or newer
-- Elixir 1.14 or newer
-- Erlang/OTP compatible with your Elixir install
+You do **not** need PostgreSQL or Redis for this prototype. Graphs are persisted to JSON files and tokens are stored in a local JSON vault.
 
-Not required for the current prototype:
+## Verify Installation (Single Command)
 
-- PostgreSQL
-- Redis
-
-The current build uses file persistence for graphs and a local JSON token vault for external integrations.
-
-## What Should Be Committed
-
-The repository is now set up so GitHub uploads include only the files needed to build and run DataPipe locally.
-
-Ignored content includes:
-
-- dependency folders such as `node_modules`
-- frontend build output such as `apps/web/dist`
-- persisted local graph snapshots in `apps/orchestrator/data/graphs`
-- local token vault data in `apps/execution-engine/.local`
-- local build and editor artifacts
-
-This means someone can clone the repo, install dependencies, and generate all local runtime files on their own machine.
-
-## Installation From GitHub
-
-Clone the repository and install dependencies in each app:
+From the repository root in **PowerShell**:
 
 ```powershell
-git clone <your-github-url>
-cd datapipe
+.\scripts\verify.ps1
 ```
+
+This script will:
+
+- install and test the **execution engine** (`apps/execution-engine`)
+- install, test, and build the **web app** (`apps/web`)
+- install dependencies and run tests for the **orchestrator** (`apps/orchestrator`)
+
+If it completes without errors, your local environment is ready.
+
+## Start DataPipe (Single Command)
+
+From the repository root in **PowerShell**:
 
 ```powershell
-cd apps/execution-engine
-npm install
-cd ../..
+.\scripts\dev.ps1
 ```
 
-```powershell
-cd apps/web
-npm install
-cd ../..
+This will:
+
+- open three new PowerShell windows:
+  - execution engine on `http://127.0.0.1:4001`
+  - orchestrator (Phoenix) on `http://127.0.0.1:4000`
+  - web app dev server
+- print a link you can click:
+
+```text
+DataPipe is booting. Once Vite finishes compiling, open:
+  http://127.0.0.1:5173
 ```
 
-```powershell
-cd apps/orchestrator
-mix setup
-cd ../..
-```
-
-After installation, start the three services using the commands in `Quick Start`.
-
-## Quick Start
-
-Open three terminals.
-
-### 1. Start the execution engine
-
-```powershell
-cd apps/execution-engine
-npm install
-npm start
-```
-
-This starts the service on `http://127.0.0.1:4001`.
-
-### 2. Start the orchestrator
-
-```powershell
-cd apps/orchestrator
-mix setup
-mix phx.server
-```
-
-This starts Phoenix on `http://127.0.0.1:4000`.
-
-### 3. Start the web app
-
-```powershell
-cd apps/web
-npm install
-npm run dev
-```
-
-Open the URL printed by Vite, usually `http://127.0.0.1:5173`.
+Wait until the Vite dev server finishes compiling, then open `http://127.0.0.1:5173` in your browser.
 
 ## End-User Walkthrough
 

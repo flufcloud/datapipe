@@ -1,3 +1,29 @@
+Param()
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+Write-Host "==> Verifying execution engine (Node.js)..." -ForegroundColor Cyan
+Push-Location "apps\execution-engine"
+npm install | Out-Null
+npm test
+Pop-Location
+
+Write-Host "==> Verifying web app (Node.js + Vite)..." -ForegroundColor Cyan
+Push-Location "apps\web"
+npm install | Out-Null
+npm test
+npm run build
+Pop-Location
+
+Write-Host "==> Verifying orchestrator (Elixir/Phoenix)..." -ForegroundColor Cyan
+Push-Location "apps\orchestrator"
+mix setup
+mix test
+Pop-Location
+
+Write-Host "`nAll verification steps completed successfully." -ForegroundColor Green
+
 param(
   [switch] $SkipBuild
 )

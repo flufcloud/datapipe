@@ -4,6 +4,7 @@ Thumbs.db
 .idea/
 .vscode/
 .elixir_ls/
+scripts/*.log
 
 # Node.js dependencies and build output
 **/node_modules/
